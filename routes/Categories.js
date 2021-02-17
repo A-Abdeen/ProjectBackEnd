@@ -1,38 +1,46 @@
 const express = require("express");
-const Router = express.Router();
-
 const {
-  CategoryFind,
-  CategoryCreate,
-  getCategoryById,
-  CategoryUpdate,
-  deleteCategory,
+  categoryList,
+  categoryDetail,
+  categoryDelete,
+  categoryUpdate,
+  categoryAdd,
   fetchCategory,
-  ingredientCreate,
-} = require("../controllers/categoriesController");
+  ingredientAdd,
+} = require("../controllers/categoriesControllers");
 
-Router.param("CategoryId", async (req, res, next, CategoryId) => {
-  const foundCategory = await fetchCategory(CategoryId, next);
+const router = express.Router();
+const upload = require("../middleware/multer.js");
+
+router.param("categoryId", async (req, res, next, categoryId) => {
+  const foundCategory = await fetchCategory(categoryId, next);
   if (foundCategory) {
-    res.category = foundCategory;
+    req.category = foundCategory;
     next();
   } else {
-    const err = new Error("No Category found by this ID");
-    err.status = 404;
-    next(err);
+    next({
+      status: 404,
+      message: "Entry not found",
+    });
   }
 });
 
-Router.get("/", CategoryFind);
+// CATEGORY LIST-----------------------------------
+router.get("/", categoryList);
 
-Router.post("/:CategoryId/ingredient", ingredientCreate);
+// SINGLE CATEGORY DETAIL BY ID-------------------- (BACKEND ONLY)
+router.get("/:categoryId", categoryDetail);
 
-Router.post("/", CategoryCreate);
+// DELETE CATEGORY BY ID--------------------------- (BACKEND ONLY)
+router.delete("/:categoryId", categoryDelete);
 
-Router.get("/:CategoryId", getCategoryById);
+// UPDATE CATEGORY BY ID--------------------------- (BACKEND ONLY)
+router.put("/:categoryId", upload.single("image"), categoryUpdate);
 
-Router.delete("/:CategoryId", deleteCategory);
+// ADD CATEGORY------------------------------------
+router.post("/", upload.single("image"), categoryAdd);
 
-Router.put("/:CategoryId", CategoryUpdate);
+// ADD INGREDIENT----------------------------------
+router.post("/:categoryId/ingredients", upload.single("image"), ingredientAdd);
 
-module.exports = Router;
+module.exports = router;

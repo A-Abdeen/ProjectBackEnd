@@ -40,22 +40,17 @@ Object.keys(db).forEach((modelName) => {
   }
 });
 
-db.sequelize = sequelize;
-db.Sequelize = Sequelize;
-
+// Relations
 db.Category.hasMany(db.Ingredient, {
   as: "ingredient",
-  foreignKey: {
-    fieldName: "categoryId",
-    // allowNull: false,
-  },
+  foreignKey: { fieldName: "categoryId", allowNull: false },
 });
-
 db.Ingredient.belongsTo(db.Category, {
   as: "category",
-  foreignKey: {
-    fieldName: "categoryId",
-  },
+  foreignKey: { fieldName: "categoryId" },
 });
+
+db.sequelize = sequelize;
+db.Sequelize = Sequelize;
 
 module.exports = db;

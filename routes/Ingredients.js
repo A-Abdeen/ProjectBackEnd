@@ -1,35 +1,39 @@
 const express = require("express");
-const Router = express.Router();
-const { Ingredient } = require("../db/models");
 const {
-  ingredientFind,
-  ingredientCreate,
-  getIngredientById,
+  ingredientList,
+  ingredientDetail,
+  ingredientDelete,
   ingredientUpdate,
-  deleteIngredient,
-  fetchIntgredient,
-} = require("../controllers/ingredientsController");
+  fetchIngredient,
+} = require("../controllers/ingredientsControllers");
 
-Router.param("ingredientId", async (req, res, next, ingredientId) => {
-  const foundIngredient = await fetchIntgredient(ingredientId, next);
+const router = express.Router();
+const upload = require("../middleware/multer.js");
+
+// ROUTE PARAM FOR DETAIL/DELETE/UPDATE
+router.param("ingredientId", async (req, res, next, ingredientId) => {
+  const foundIngredient = await fetchIngredient(ingredientId, next);
   if (foundIngredient) {
     req.ingredient = foundIngredient;
     next();
   } else {
-    const err = new Error("No ingredient found by this ID");
-    err.status = 404;
-    next(err);
+    next({
+      status: 404,
+      message: "Entry not found",
+    });
   }
 });
 
-Router.get("/", ingredientFind);
+// INGREDIENT LIST-----------------------------------
+router.get("/", ingredientList);
 
-Router.post("/", ingredientCreate);
+// SINGLE INGREDIENT DETAIL BY ID-------------------- (BACKEND ONLY)
+router.get("/:ingredientId", ingredientDetail);
 
-Router.get("/:ingredientId", getIngredientById);
+// DELETE INGREDIENT BY ID--------------------------- (BACKEND ONLY)
+router.delete("/:ingredientId", ingredientDelete);
 
-Router.delete("/:ingredientId", deleteIngredient);
+// UPDATE INGREDIENT BY ID--------------------------- (BACKEND ONLY)
+router.put("/:ingredientId", upload.single("image"), ingredientUpdate);
 
-Router.put("/:ingredientId", ingredientUpdate);
-
-module.exports = Router;
+module.exports = router;
