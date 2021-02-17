@@ -47,10 +47,12 @@ db.Category.hasMany(db.Ingredient, {
   as: "ingredient",
   foreignKey: {
     fieldName: "categoryId",
+    // allowNull: false,
   },
 });
+
 db.Ingredient.belongsTo(db.Category, {
-  as: "catergory",
+  as: "category",
   foreignKey: {
     fieldName: "categoryId",
   },
